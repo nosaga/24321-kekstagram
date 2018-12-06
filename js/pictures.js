@@ -50,15 +50,13 @@ var renderPhotos = function (index) {
   photoElement.dataset.index = index;
 
   photoElement.addEventListener('click', function (evt) {
-    console.log('I work');
     var target = evt.target;
-    showBigPicture(target.dataset.index);
+    renderBigPicture(target.closest('.picture').dataset.index);
   });
   return photoElement;
 };
 
 var setPhotos = function () {
-
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < photos.length; i++) {
     fragment.appendChild(renderPhotos(i));
@@ -66,32 +64,23 @@ var setPhotos = function () {
   return similarListPhotos.appendChild(fragment);
 };
 
-document.addEventListener('DOMContentLoaded', setPhotos)
+var hideBlock = function (elemClass) {
+  return elemClass.classList.add('visually-hidden');
+};
 
 var setDialog = function () {
   return document.querySelector('.big-picture').classList.remove('hidden');
 };
 
-var hideBlock = function (elemClass) {
-  return elemClass.classList.add('visually-hidden');
-}
-
-var showBigPicture =  function (index) {
-  var bigPicture = renderBigPicture([index]);
-  console.log(bigPicture);
-}
-
-
-
-var renderBigPicture = function (picture) {
-  var bigPicture = photos[picture];
+var renderBigPicture = function (photo) {
+  var bigPicture = photos[photo];
   document.querySelector('.big-picture__img').children[0].src = bigPicture.url;
   document.querySelector('.likes-count').innerHTML = bigPicture.likes;
   document.querySelector('.comments-count').innerHTML = bigPicture.comments.length;
   var commentsBlocks = document.createDocumentFragment();
   var commentBlock = document.querySelector('.social__comment');
-  var newCommentBlock = commentBlock.cloneNode(true);
-  for (var i = 0; i < bigPicture.comments.length; i++) {
+  for (var i = 0; i < 5; i++) {
+    var newCommentBlock = commentBlock.cloneNode(true);
     newCommentBlock.children[0].src = 'img/avatar-' + getRandomFrom(1, 6) + '.svg';
     newCommentBlock.children[1].innerHTML = bigPicture.comments;
     commentsBlocks.appendChild(newCommentBlock);
@@ -100,8 +89,8 @@ var renderBigPicture = function (picture) {
 
   hideBlock(document.querySelector('.social__comment-count'));
   hideBlock(document.querySelector('.comments-loader'));
+  setDialog();
+  return bigPicture;
 }
 
 setPhotos();
-renderBigPicture();
-setDialog();
