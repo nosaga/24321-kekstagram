@@ -1,5 +1,16 @@
 'use strict';
-
+var form = document.querySelector('.img-upload__form');
+var fileInput = form.elements.filename;
+var formUpload = document.querySelector('.img-upload__overlay');
+var uploadClose = document.querySelector('.img-upload__cancel');
+var mainImg = document.querySelector('.img-upload__preview');
+var effectsBlock = document.querySelector('.effect-level__line');
+var effectsPin = document.querySelector('.effect-level__pin');
+var effectsDepth = document.querySelector('.effect-level__depth');
+var effectsChrome = document.querySelector('#effect-chrome');
+var ESC_BTN = 27;
+var ENTER_BTN = 13;
+var EFFECT_MAX = 454;
 
 var getRandomFrom = function (min, max) {
   var rand = min + Math.random() * (max + 1 - min);
@@ -91,6 +102,100 @@ var renderBigPicture = function (photo) {
   hideBlock(document.querySelector('.comments-loader'));
   setDialog();
   return bigPicture;
+};
+
+var showForm = function () {
+  formUpload.classList.remove('hidden');
+  document.addEventListener('keydown', onPopupEscPress);
+};
+
+var closeForm = function () {
+  formUpload.classList.add('hidden');
+  document.removeEventListener('keydown', onPopupEscPress);
+};
+
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === ESC_BTN) {
+    closeForm();
+  }
+};
+
+fileInput.addEventListener('change', showForm);
+fileInput.addEventListener('keydown', function (evt) {
+  if (evt.keyCode === ENTER_BTN) {
+    showForm();
+  }
+});
+uploadClose.addEventListener('click', closeForm);
+uploadClose.addEventListener('keydown', function () {
+  onPopupEscPress();
+});
+
+
+var effectsLevel = effectsPin.style.left;
+
+
+effectsPin.addEventListener('mousedown', function (e) {
+  e.preventDefault();
+  function getCoords(elem) {
+    var box = elem.getBoundingClientRect();
+    return {
+      top: box.top + pageYOffset,
+      left: box.left + pageXOffset
+    };
+  }
+
+  var thumbCoords = getCoords(effectsPin);
+  var shiftX = e.pageX - thumbCoords.left;
+
+  var blockCoords = getCoords(effectsBlock);
+
+  var onMouseMove = function (evt) {
+    evt.preventDefault();
+    var newLeft = evt.pageX - shiftX - blockCoords.left;
+    if (newLeft < 0) {
+      newLeft = 0;
+    }
+
+    var rightEdge = effectsBlock.offsetWidth;
+    if (newLeft > rightEdge) {
+      newLeft = rightEdge;
+    }
+
+    effectsPin.style.left = newLeft + 'px';
+    effectsDepth.style.width = newLeft + 'px';
+    effectsLevel = effectsLevel * 100 / EFFECT_MAX;
+    return effectsLevel;
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+  return effectsLevel;
+});
+
+var clearFilters = function () {
+  var styles = effectsPin.style.left = effectsDepth.style.width = 0;
+  return styles;
 }
+
+effectsChrome.addEventListener('change', function () {
+  clearFilters();
+  mainImg.style.filter = 'grayscale(' + effectsLevel + ')';
+  console.log('I work');
+});
+
+
+effectsChrome.addEventListener('change', function () {
+  clearFilters();
+  mainImg.style.filter = 'grayscale(' + effectsLevel + ')';
+  console.log('I work');
+});
+
 
 setPhotos();
